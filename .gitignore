@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+
+# Models / embeddings
+*.bin
+*.model
+*.vec
+*.npy
+
+# Logs
+*.log
+
+# VSCode
+.vscode/
