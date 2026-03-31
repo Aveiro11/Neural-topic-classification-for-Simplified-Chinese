@@ -247,4 +247,5 @@ python codes/evaluation.py --model model.pt --test sentence_embeddings/test_embe
 
 ## Session Transcript
 
-See `transcript.txt` in this repo for the full terminal session recorded on mltgpu on 2026-03-31.
+See `transcript.txt` and `session_transcript.txt` in this repo for the full raw terminal session recorded on mltgpu on 2026-03-31.
+For a more polished readable version go for `Transcript.md`

@@ -1,0 +1,203 @@
+# Terminal Session Transcript
+
+Recorded on mltgpu on 2026-03-31
+
+---
+
+## Step 1 — Train FastText Embeddings
+```bash
+python codes/training.py \
+    Database/train.tsv \
+    Database/dev.tsv \
+    Database/test.tsv \
+    --dim 100 \
+    --output embeddings.model \
+    --epochs 10
+```
+```
+Loaded 1,004 sentences from 3 file(s).
+
+Training FastText with dim=100, window=5, min_count=1, epochs=10...
+(This might take a minute or two depending on the server load.)
+
+Done! Model saved to: embeddings.model
+Vocabulary size: 2,570 unique tokens
+```
+
+---
+
+## Step 2 — Make Sentence Embeddings
+```bash
+mkdir -p sentence_embeddings
+
+python codes/snt_emb.py \
+    Database/train.tsv \
+    Database/dev.tsv \
+    Database/test.tsv \
+    --model embeddings.model \
+    --output_dir sentence_embeddings/
+```
+```
+Loading FastText model from: embeddings.model
+Model loaded. Each sentence will become a 100-dimensional vector.
+
+Processing: Database/train.tsv
+  -> Saved 701 sentence embeddings to: sentence_embeddings/train_embeddings.npz
+     Shape: (701, 100)
+     Label counts:
+       science/technology: 176
+       travel: 138
+       politics: 102
+       sports: 85
+       health: 77
+       entertainment: 65
+       geography: 58
+
+Processing: Database/dev.tsv
+  -> Saved 99 sentence embeddings to: sentence_embeddings/dev_embeddings.npz
+     Shape: (99, 100)
+     Label counts:
+       science/technology: 25
+       travel: 20
+       politics: 14
+       sports: 12
+       health: 11
+       entertainment: 9
+       geography: 8
+
+Processing: Database/test.tsv
+  -> Saved 204 sentence embeddings to: sentence_embeddings/test_embeddings.npz
+     Shape: (204, 100)
+     Label counts:
+       science/technology: 51
+       travel: 40
+       politics: 30
+       sports: 25
+       health: 22
+       entertainment: 19
+       geography: 17
+
+All done!
+```
+
+---
+
+## Step 3 — Train the Classifier
+```bash
+python codes/clf_training.py \
+    --train  sentence_embeddings/train_embeddings.npz \
+    --dev    sentence_embeddings/dev_embeddings.npz \
+    --labels Database/labels.txt \
+    --output model.pt \
+    --epochs 30 \
+    --batch_size 64 \
+    --plot training_curve.png
+```
+```
+Using device: cuda
+Found 7 categories: science/technology, travel, politics, sports, health, entertainment, geography
+Training on 701 sentences with 100-dim embeddings.
+Dev set: 99 sentences.
+
+Model architecture:
+TopicClassifier(
+  (network): Sequential(
+    (0): Linear(in_features=100, out_features=256, bias=True)
+    (1): ReLU()
+    (2): Dropout(p=0.3, inplace=False)
+    (3): Linear(in_features=256, out_features=128, bias=True)
+    (4): ReLU()
+    (5): Dropout(p=0.3, inplace=False)
+    (6): Linear(in_features=128, out_features=7, bias=True)
+  )
+)
+
+Epoch   1/30  loss=1.9245  train_acc=0.2069  dev_acc=0.2525
+Epoch   2/30  loss=1.8681  train_acc=0.2511  dev_acc=0.2525
+Epoch   3/30  loss=1.8248  train_acc=0.2507  dev_acc=0.2626
+Epoch   4/30  loss=1.7811  train_acc=0.2904  dev_acc=0.3434
+Epoch   5/30  loss=1.7201  train_acc=0.3095  dev_acc=0.3535
+Epoch   6/30  loss=1.6512  train_acc=0.3816  dev_acc=0.4646
+Epoch   7/30  loss=1.5893  train_acc=0.4074  dev_acc=0.5354
+Epoch   8/30  loss=1.5281  train_acc=0.4537  dev_acc=0.5556
+Epoch   9/30  loss=1.4687  train_acc=0.4762  dev_acc=0.5960
+Epoch  10/30  loss=1.4215  train_acc=0.5249  dev_acc=0.6263
+Epoch  11/30  loss=1.3702  train_acc=0.5177  dev_acc=0.6061
+Epoch  12/30  loss=1.3197  train_acc=0.5476  dev_acc=0.6061
+Epoch  13/30  loss=1.2635  train_acc=0.5453  dev_acc=0.6162
+Epoch  14/30  loss=1.2322  train_acc=0.5610  dev_acc=0.6465
+Epoch  15/30  loss=1.2011  train_acc=0.5673  dev_acc=0.6364
+Epoch  16/30  loss=1.1785  train_acc=0.5748  dev_acc=0.6667
+Epoch  17/30  loss=1.1674  train_acc=0.5794  dev_acc=0.6566
+Epoch  18/30  loss=1.1500  train_acc=0.6093  dev_acc=0.6566
+Epoch  19/30  loss=1.1044  train_acc=0.6193  dev_acc=0.6768
+Epoch  20/30  loss=1.0817  train_acc=0.6106  dev_acc=0.6566
+Epoch  21/30  loss=1.0725  train_acc=0.6162  dev_acc=0.6566
+Epoch  22/30  loss=1.0584  train_acc=0.6204  dev_acc=0.6465
+Epoch  23/30  loss=1.0654  train_acc=0.6162  dev_acc=0.6364
+Epoch  24/30  loss=1.0487  train_acc=0.6176  dev_acc=0.6566
+Epoch  25/30  loss=1.0095  train_acc=0.6333  dev_acc=0.6465
+Epoch  26/30  loss=1.0076  train_acc=0.6363  dev_acc=0.6667
+Epoch  27/30  loss=0.9799  train_acc=0.6389  dev_acc=0.6566
+Epoch  28/30  loss=0.9744  train_acc=0.6505  dev_acc=0.6667
+Epoch  29/30  loss=0.9829  train_acc=0.6377  dev_acc=0.6667
+Epoch  30/30  loss=0.9792  train_acc=0.6549  dev_acc=0.6566
+
+Model saved to: model.pt
+Training curve saved to: training_curve.png
+```
+
+---
+
+## Step 4 — Evaluate
+```bash
+python codes/evaluation.py \
+    --model model.pt \
+    --test  sentence_embeddings/test_embeddings.npz
+```
+```
+Using device: cuda
+Model loaded from: model.pt
+
+=======================================================
+  Test samples : 204
+  Accuracy     : 0.6225  (127/204 correct)
+  Chance level : 0.1429  (random guessing over 7 classes)
+  Above chance : YES  (difference: +0.4797)
+=======================================================
+
+Per-class accuracy:
+  Category                        Correct / Total   Acc
+  -------------------------------------------------------
+  science/technology               39 /  51         0.765
+  travel                           34 /  40         0.850
+  politics                         20 /  30         0.667
+  sports                           14 /  25         0.560
+  health                           10 /  22         0.455
+  entertainment                     1 /  19         0.053
+  geography                         9 /  17         0.529
+
+Confusion Matrix  (rows = true label, columns = predicted label):
+
+                    science/technology    travel    politics    sports    health    entertainment    geography
+-------------------------------------------------------------------------------------------------------------
+science/technology                  39         5           0         1         5                0            1
+travel                               3        34           1         0         0                2            0
+politics                             1         4          20         1         3                0            1
+sports                               1         4           0        14         3                2            1
+health                              10         0           2         0        10                0            0
+entertainment                        8         6           3         1         0                1            0
+geography                            3         2           1         1         0                1            9
+
+Top confused pairs (true -> predicted):
+  health                          ->  science/technology              (10 times)
+  entertainment                   ->  science/technology              (8 times)
+  entertainment                   ->  travel                          (6 times)
+  science/technology              ->  travel                          (5 times)
+  science/technology              ->  health                          (5 times)
+  sports                          ->  travel                          (4 times)
+  politics                        ->  travel                          (4 times)
+  travel                          ->  science/technology              (3 times)
+  sports                          ->  health                          (3 times)
+  politics                        ->  health                          (3 times)
+```
