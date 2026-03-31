@@ -1,0 +1,8 @@
+Loaded 1,004 sentences from 3 file(s).
+
+Training FastText with dim=100, window=5, min_count=1, epochs=10...
+(This might take a minute or two depending on the server load.)
+
+
+Done! Model saved to: embeddings.model
+Vocabulary size: 2,570 unique tokens
