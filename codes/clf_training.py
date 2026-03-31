@@ -1,12 +1,3 @@
-
-# Example (with dev set + training curve plot, for the bonus):
-#   python train_classifier.py \
-#       --train sentence_embeddings/train_embeddings.npz \
-#       --dev   sentence_embeddings/dev_embeddings.npz \
-#       --labels data/labels.txt \
-#       --output model.pt \
-#       --epochs 30 --plot training_curve.png
-
 import argparse
 import numpy as np
 import torch

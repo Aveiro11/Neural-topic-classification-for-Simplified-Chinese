@@ -1,7 +1,3 @@
-# Example usage:
-#   python train_embeddings.py data/train.tsv data/dev.tsv data/test.tsv \
-#       --dim 100 --output embeddings.model --epochs 10
-
 import argparse
 import re
 import pandas as pd

@@ -1,8 +1,3 @@
-# Example usage:
-#   python evaluate.py \
-#       --model model.pt \
-#       --test  sentence_embeddings/test_embeddings.npz
-
 import argparse
 import numpy as np
 import torch
